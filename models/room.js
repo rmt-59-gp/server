@@ -14,12 +14,21 @@ module.exports = (sequelize, DataTypes) => {
       Room.hasMany(models.UserRoom, {
         foreignKey: 'RoomId'
       });
+      Room.belongsTo(models.User, {
+        foreignKey: 'host',
+      });
     }
   }
   Room.init({
     CodeRoom: DataTypes.STRING,
     question: DataTypes.JSON,
-    host: DataTypes.INTEGER
+    host: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Users',
+        key: 'id'
+      },
+    }
   }, {
     sequelize,
     modelName: 'Room',

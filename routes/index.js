@@ -1,4 +1,6 @@
 const Controller = require('../controllers/controller');
+const authentication = require('../middleware/authentication.');
+const errorHandler = require('../middleware/errorHandling');
 const router = require('express').Router();
 
 
@@ -6,7 +8,9 @@ router.get('/', (req, res) => {
   res.send('Welcome to the API!');
 });
 router.post('/users', Controller.createUser);
-// router.post('/rooms')
+router.use(authentication)
+
+router.post('/rooms', Controller.createRoom)
 // router.post('/rooms/:roomId/join')
 // router.get('/rooms/:roomId/questions')
 // router.post('/rooms/:roomId/answers')
