@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.hasMany(models.Room, {
+        foreignKey: 'host'
+      });
       User.hasMany(models.UserRoom, {
         foreignKey: 'UserId'
       });
@@ -20,6 +23,14 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: 'Name is required'
+        },
+        notNull: {
+          msg: 'Name is required'
+        }
+      }
     }
   }, {
     sequelize,

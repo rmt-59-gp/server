@@ -12,9 +12,17 @@ function errorHandler(err, req, res, next) {
             status = 400;
             message = err.errors[0].message;
             break;
+        case 'BadRequest':
+            status = 400;
+            message = err.message;
+            break;
         case 'JsonWebTokenError':
             status = 401;
             message = "Invalid token";
+            break;
+        case 'Unauthorized':
+            status = 401;
+            message = err.message;
             break;
         case 'NotFoundError':
             status = 404;
