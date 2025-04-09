@@ -193,3 +193,79 @@ _Response (500 - Internal Server Error)_
   "message": "Internal server error"
 }
 ```
+
+## 5. GET /rooms/:roomId/questions
+
+Description:
+- Get question
+
+Request:
+
+- params:
+
+```json
+{
+  "roomId": "integer (required)"
+}
+```
+
+_Response (200 - OK)_
+
+```json
+{
+    "data": "string"
+}
+```
+
+_Response (500 - Internal Server Error)_
+
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+## 6. PUT /rooms/:roomId/:questionId
+
+Description:
+- Validate answer and update score
+
+Request:
+
+- params:
+
+```json
+{
+  "roomId": "integer (required)",
+  "questionId": "integer (required)"
+}
+```
+
+_Response (200 - OK)_ if correct answer
+
+```json
+{
+    "message": "string",
+    "data": {
+        "UserId": "integer",
+        "RoomId": "integer",
+        "score": "integer"
+    }
+}
+```
+
+_Response (200 - OK)_ if wrong answer
+
+```json
+{
+    "message": "string"
+}
+```
+
+_Response (500 - Internal Server Error)_
+
+```json
+{
+  "message": "Internal server error"
+}
+```

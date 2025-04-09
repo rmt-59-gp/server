@@ -130,6 +130,50 @@ class Controller {
             next(error)
         }
     }
+
+    static async validateAnswer(req, res, next){
+        try {
+            const {roomId, questionId} = req.params
+            const {answer} = req.body
+            const room = await Room.findByPk(+roomId)
+            const question = JSON.parse(room.question)
+
+            const currentUser = await UserRoom.findOne({
+                where: {
+                    UserId: req.user.id,
+                    RoomId: roomId
+                }
+            })
+
+            const currentScore = currentUser.score
+
+            if(answer === question[questionId].correctAnswer){
+                await UserRoom.update({
+                    score: currentScore + question[questionId].score
+                }, {
+                    where: {
+                        UserId: req.user.id,
+                        RoomId: roomId
+                    }
+                })
+               return res.status(200).json({
+                    message: 'Correct Answer',
+                    data: {
+                        UserId: req.user.id,
+                        RoomId: +roomId,
+                        score: currentScore + question[questionId].score
+                    }
+                })
+            }
+            res.status(200).json({
+                message: 'Wrong Answer'
+            })
+
+        } catch (error) {
+            console.log(error);
+            next(error)
+        }
+    }
 }
 
 module.exports = Controller;
