@@ -42,7 +42,6 @@ async function roomHandler({ io, socket }) {
           where: { id: room.id }
         });
 
-        const roomAll = await Room.findAll();
 
         // Join the room and send room data to the client
         socket.join(room.code);
@@ -85,58 +84,51 @@ async function roomHandler({ io, socket }) {
       }
     });
 
-  } catch (error) {
-    console.error('Socket error:', error);
-  }
-
-  let roomCode
-  
-  socket.on('question:getRoomCode', async (arg)=> {
-    question = await Room.findOne({
-      where: {
-        code: arg.id
+    
+    let roomCode
+    
+    socket.on('question:getRoomCode', async (arg)=> {
+      question = await Room.findOne({
+        where: {
+          code: arg.id
       }
     })
     console.log(question.questions, '<=====');
     
     socket.emit('question:get', {question: question.questions})
   })
-
+  
   socket.on('username:send', async (arg)=> {
     const userData = await User.findOne({
       where: {
         name: arg.name
       }
     })
-
+    
     const userRoomData = await UserRoom.findOne({
       where: {
         UserId: userData.id
       }
     })
-
+    
     console.log(userRoomData, '<=====');
     socket.emit('user:score', {score: userRoomData.score})
     
   })
-  // question = await Room.findOne({
-  //   where: {
-  //     code: roomCode
-  //   }
-  // })
   
-
-
-    socket.on('leaderboard:fetch', async ({ roomId }) => {
-      try {
-        const room = await Room.findOne({
-          where: { id: roomId },
-        });
-
-        if (!room) {
+  
+  
+  
+  socket.on('leaderboard:fetch', async ({ roomId }) => {
+    try {
+      const room = await Room.findOne({
+        where: { id: roomId },
+      });
+      
+      if (!room) {
           return socket.emit('error', { message: 'Room not found' });
         }
-
+        
         const leaderboard = await UserRoom.findAll({
           where: { RoomId: roomId },
           include: [
@@ -153,19 +145,21 @@ async function roomHandler({ io, socket }) {
           username: entry.User.name,
           score: entry.User.score,
         }));
-
+        
         socket.emit('leaderboard:get', leaderboardData);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
         socket.emit('error', { message: 'Failed to fetch leaderboard' });
       }
     });
-
     
   } catch (error) {
     console.error('Socket error:', error);
   }
-}
-
-
-module.exports = roomHandler;
+    
+    
+  }
+  
+  
+  
+  module.exports = roomHandler;
