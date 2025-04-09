@@ -1,10 +1,12 @@
 
+
 const generateQuestion = require('../helpers/generateQuestion');
 const { Room, UserRoom, User } = require('../models');
 
 async function roomHandler({ io, socket }) {
 
   let question
+
   try {
     socket.on('room:create', async ({ name, topic }) => {
       try {
@@ -15,16 +17,12 @@ async function roomHandler({ io, socket }) {
           where: { name: username },
         });
 
-        console.log(1, '=======');
         if (!user) {
           return socket.emit('error', { message: 'User not found' });
         }
-
         question = await generateQuestion(topic)
         
-        console.log(1, '=======');
-        // console.log(1);
-        
+
         // Create the room
         const room = await Room.create({
           name,
@@ -32,20 +30,19 @@ async function roomHandler({ io, socket }) {
           members: [username],
           host: username,
         });
-        
-        console.log(1, '=======');
-        // console.log(1);
+
         // Associate the user with the room
         await UserRoom.create({
           UserId: user.id,
           RoomId: room.id,
         });
-        
-        console.log(1);
+
         const roomAll = await Room.findAll();
         await Room.update({ questions: question }, {
           where: { id: room.id }
         });
+
+        const roomAll = await Room.findAll();
 
         // Join the room and send room data to the client
         socket.join(room.code);
@@ -87,6 +84,7 @@ async function roomHandler({ io, socket }) {
         socket.emit('error', { message: 'Failed to join room' });
       }
     });
+
   } catch (error) {
     console.error('Socket error:', error);
   }
@@ -127,6 +125,46 @@ async function roomHandler({ io, socket }) {
   //   }
   // })
   
+
+
+    socket.on('leaderboard:fetch', async ({ roomId }) => {
+      try {
+        const room = await Room.findOne({
+          where: { id: roomId },
+        });
+
+        if (!room) {
+          return socket.emit('error', { message: 'Room not found' });
+        }
+
+        const leaderboard = await UserRoom.findAll({
+          where: { RoomId: roomId },
+          include: [
+            {
+              model: User,
+              attributes: ['name', 'score'],
+            },
+          ],
+          order: [[{ model: User }, 'score', 'DESC']],
+        });
+
+        const leaderboardData = leaderboard.map((entry, index) => ({
+          rank: index + 1,
+          username: entry.User.name,
+          score: entry.User.score,
+        }));
+
+        socket.emit('leaderboard:get', leaderboardData);
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        socket.emit('error', { message: 'Failed to fetch leaderboard' });
+      }
+    });
+
+    
+  } catch (error) {
+    console.error('Socket error:', error);
+  }
 }
 
 

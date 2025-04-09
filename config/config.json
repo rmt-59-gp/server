@@ -2,8 +2,8 @@
   "development": {
     "username": "postgres",
     "password": "postgres",
-    "database": "quiziz-2",
-    "host": "localhost",
+    "database": "quiziz",
+    "host": "127.0.0.1",
     "dialect": "postgres"
   },
   "test": {

@@ -11,9 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+
       User.hasMany(models.Room, {
         foreignKey: 'host'
       });
+
       User.hasMany(models.UserRoom, {
         foreignKey: 'UserId',
         onDelete: 'CASCADE'
