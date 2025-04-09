@@ -12,17 +12,40 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       UserRoom.belongsTo(models.User, {
-        foreignKey: 'UserId'
+        foreignKey: 'UserId',
+        onDelete: 'CASCADE'
       });
       UserRoom.belongsTo(models.Room, {
-        foreignKey: 'RoomId'
+        foreignKey: 'RoomId',
+        onDelete: 'CASCADE'
       });
     }
   }
   UserRoom.init({
-    UserId: DataTypes.INTEGER,
-    RoomId: DataTypes.INTEGER,
-    score: DataTypes.INTEGER
+    UserId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'id'
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+    RoomId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Rooms',
+        key: 'id'
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    },
+    score: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   }, {
     sequelize,
     modelName: 'UserRoom',

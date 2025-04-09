@@ -15,19 +15,21 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'host'
       });
       User.hasMany(models.UserRoom, {
-        foreignKey: 'UserId'
+        foreignKey: 'UserId',
+        onDelete: 'CASCADE'
       });
     }
   }
   User.init({
     name: {
       type: DataTypes.STRING,
+      unique: true,
       allowNull: false,
       validate: {
-        notEmpty: {
+        notNull: {
           msg: 'Name is required'
         },
-        notNull: {
+        notEmpty: {
           msg: 'Name is required'
         }
       }

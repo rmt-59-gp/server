@@ -22,7 +22,7 @@ async function generateQuestion(topic){
                 hanya tampilkan data json itu saja tanpa ada data yang lain
             `,
           });
-          console.log(response.text);
+        //   console.log(response.text);
           return response.text.replace("```json", "").replace("```", "")
     } catch (error) {
         console.log(error);
