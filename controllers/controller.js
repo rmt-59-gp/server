@@ -117,6 +117,19 @@ class Controller {
             next(error)
         }
     }
+
+    static async getQuestion(req, res, next){
+        try {
+            const question = await Room.findByPk(+req.params.roomId)
+            res.status(200).json({
+                data: question.question
+            })
+
+        } catch (error) {
+            console.log(error);
+            next(error)
+        }
+    }
 }
 
 module.exports = Controller;
