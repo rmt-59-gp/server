@@ -71,6 +71,42 @@ async function roomHandler({ io, socket }) {
         socket.emit('error', { message: 'Failed to join room' });
       }
     });
+
+    socket.on('leaderboard:fetch', async ({ roomId }) => {
+      try {
+        const room = await Room.findOne({
+          where: { id: roomId },
+        });
+
+        if (!room) {
+          return socket.emit('error', { message: 'Room not found' });
+        }
+
+        const leaderboard = await UserRoom.findAll({
+          where: { RoomId: roomId },
+          include: [
+            {
+              model: User,
+              attributes: ['name', 'score'],
+            },
+          ],
+          order: [[{ model: User }, 'score', 'DESC']],
+        });
+
+        const leaderboardData = leaderboard.map((entry, index) => ({
+          rank: index + 1,
+          username: entry.User.name,
+          score: entry.User.score,
+        }));
+
+        socket.emit('leaderboard:get', leaderboardData);
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        socket.emit('error', { message: 'Failed to fetch leaderboard' });
+      }
+    });
+
+    
   } catch (error) {
     console.error('Socket error:', error);
   }
