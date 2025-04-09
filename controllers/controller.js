@@ -131,6 +131,7 @@ class Controller {
         }
     }
 
+
     static async validateAnswer(req, res, next){
         try {
             const {roomId, questionId} = req.params
@@ -172,6 +173,102 @@ class Controller {
         } catch (error) {
             console.log(error);
             next(error)
+        }
+    }
+
+    static async submitAnswers(req, res, next) {
+        try {
+            const { roomId } = req.params;
+            const { answers } = req.body;
+            const userId = req.user.id;
+    
+            if (!answers || !Array.isArray(answers)) {
+                throw { name: 'BadRequest', message: 'Answers are required and must be an array' };
+            }
+    
+            const room = await Room.findByPk(roomId);
+            if (!room) throw { name: 'NotFound', message: 'Room not found' };
+    
+            const questions = JSON.parse(room.question);
+    
+            let score = 0;
+            answers.forEach((answer) => {
+                const question = questions.find((q) => q.id === answer.questionId);
+                if (question && question.answer === answer.answer) {
+                    score += 10;
+                }
+            });
+    
+            const userRoom = await UserRoom.findOne({
+                where: { UserId: userId, RoomId: roomId },
+            });
+            if (userRoom) {
+                userRoom.score = (userRoom.score || 0) + score;
+                await userRoom.save();
+            }
+    
+            res.status(200).json({ message: 'Answers submitted successfully', score });
+        } catch (error) {
+            console.log(error);
+            next(error);
+        }
+    }
+    static async startGame(req, res, next) {
+        try {
+            const { roomId } = req.params;
+    
+            const room = await Room.findByPk(roomId);
+            if (!room) throw { name: 'NotFound', message: 'Room not found' };
+    
+            req.io.to(room.CodeRoom).emit('gameStarted', { message: 'Game has started!' });
+    
+            res.status(200).json({ message: 'Game started successfully' });
+        } catch (error) {
+            console.log(error,'<--- ini errornya');
+            next(error);
+        }
+    }
+    static async endGame(req, res, next) {
+        try {
+            const { roomId } = req.params;
+    
+            const room = await Room.findByPk(roomId);
+            if (!room) throw { name: 'NotFound', message: 'Room not found' };
+    
+            const leaderboard = await UserRoom.findAll({
+                where: { RoomId: roomId },
+                include: [{ model: User, attributes: ['name'] }],
+                attributes: ['UserId', 'score'],
+                order: [['score', 'DESC']],
+            });
+    
+            req.io.to(room.CodeRoom).emit('gameEnded', { leaderboard });
+    
+            res.status(200).json({ message: 'Game ended successfully', leaderboard });
+        } catch (error) {
+            console.log(error);
+            next(error);
+        }
+    }
+    static async getLeaderboard(req, res, next) {
+        try {
+            const { roomId } = req.params;
+    
+            const room = await Room.findByPk(roomId);
+            if (!room) throw { name: 'NotFound', message: 'Room not found' };
+    
+            const leaderboard = await UserRoom.findAll({
+                where: { RoomId: roomId },
+                include: [{ model: User, attributes: ['name'] }],
+                attributes: ['UserId', 'score'],
+                order: [['score', 'DESC']],
+            });
+    
+            res.status(200).json({ leaderboard });
+        } catch (error) {
+            console.log(error);
+            next(error);
+
         }
     }
 }

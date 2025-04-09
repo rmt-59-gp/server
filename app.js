@@ -14,7 +14,17 @@ const io = new Server(httpServer, {
   cors: "*"
 });
 
+
 handlers(io);
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+const attachSocketIO = (io) => (req, res, next) => {
+  req.io = io;
+  next();
+};
+app.use(attachSocketIO(io));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
