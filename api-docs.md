@@ -193,7 +193,35 @@ _Response (500 - Internal Server Error)_
   "message": "Internal server error"
 }
 ```
-## 5. POST /rooms/:roomId/answers
+
+
+## 5. GET /rooms/:roomId/questions
+
+Description:
+- Get question
+
+Request:
+
+- params:
+
+```json
+{
+  "roomId": "integer (required)"
+}
+```
+
+_Response (200 - OK)_
+
+```json
+{
+    "data": "string"
+}
+```
+
+_Response (500 - Internal Server Error)_
+
+
+## 6. POST /rooms/:roomId/answers
 
 **Description**:
 - Submit answers for a specific room.
@@ -250,7 +278,7 @@ _Response (500 - Internal Server Error)_
 
 ---
 
-## 6. POST /rooms/:roomId/start
+## 7. POST /rooms/:roomId/start
 
 **Description**:
 - Start the game for a specific room.
@@ -279,15 +307,57 @@ _Response (500 - Internal Server Error)_
 ```
 
 **_Response (500 - Internal Server Error)_**:
+
 ```json
 {
   "message": "Internal server error"
 }
 ```
 
+
+## 8. PUT /rooms/:roomId/:questionId
+
+Description:
+- Validate answer and update score
+
+Request:
+
+- params:
+
+```json
+{
+  "roomId": "integer (required)",
+  "questionId": "integer (required)"
+}
+```
+
+_Response (200 - OK)_ if correct answer
+
+```json
+{
+    "message": "string",
+    "data": {
+        "UserId": "integer",
+        "RoomId": "integer",
+        "score": "integer"
+    }
+}
+```
+
+_Response (200 - OK)_ if wrong answer
+
+```json
+{
+    "message": "string"
+}
+```
+
+_Response (500 - Internal Server Error)_
+
+
 ---
 
-## 7. POST /rooms/:roomId/end
+## 9. POST /rooms/:roomId/end
 
 **Description**:
 - End the game for a specific room and calculate the final scores.
@@ -331,7 +401,7 @@ _Response (500 - Internal Server Error)_
 
 ---
 
-## 8. GET /rooms/:roomId/leaderboard
+## 10. GET /rooms/:roomId/leaderboard
 
 **Description**:
 - Retrieve the leaderboard for a specific room.
@@ -366,6 +436,7 @@ _Response (500 - Internal Server Error)_
 ```
 
 **_Response (500 - Internal Server Error)_**:
+
 ```json
 {
   "message": "Internal server error"

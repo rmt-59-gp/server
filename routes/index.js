@@ -1,14 +1,13 @@
-const Controller = require('../controllers/controller');
-const authentication = require('../middleware/authentication.');
-const errorHandler = require('../middleware/errorHandling');
-const router = require('express').Router();
-
+const express = require('express');
+const RoomController = require('../controllers/room.controller');
+const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.send('Welcome to the API!');
+  res.send('Hello World!');
 });
-router.post('/users', Controller.createUser);
-router.use(authentication)
+
+
+router.get('/rooms', RoomController.getAllRooms);
 
 router.post('/rooms', Controller.createRoom)
 router.post('/rooms/join', Controller.joinRoomFromCode)
@@ -18,5 +17,6 @@ router.post('/rooms/:roomId/answers', Controller.submitAnswers)
 router.post('/rooms/:roomId/start', Controller.startGame)
 router.post('/rooms/:roomId/end', Controller.endGame)
 router.get('/rooms/:roomId/leaderboard', Controller.getLeaderboard)
+
 
 module.exports = router;

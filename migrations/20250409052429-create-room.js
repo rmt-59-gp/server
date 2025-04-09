@@ -9,18 +9,31 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      CodeRoom: {
+      name: {
+        allowNull: false,
         type: Sequelize.STRING
       },
-      question: {
+      code: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      topic: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      questions: {
+        allowNull: false,
+        defaultValue: [],
+        type: Sequelize.JSON
+      },
+      members: {
+        allowNull: false,
+        defaultValue: [],
         type: Sequelize.JSON
       },
       host: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id'
-        },
+        allowNull: false,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
