@@ -29,8 +29,9 @@ class Controller {
 
     static async createRoom(req, res, next){
         try {
+            const {topic} = req.body
             const roomCode = generateCode(6)
-            const question = await generateQuestion("politik")
+            const question = await generateQuestion(topic)
             const host = req.user.id
 
             const room = await Room.create({
@@ -89,6 +90,7 @@ class Controller {
     static async joinRoomFromCode(req, res, next){
         try {
             const {CodeRoom} = req.body
+            const userId = req.user.id
             if(!CodeRoom) throw {name: 'BadRequest', message: 'CodeRoom is required'}
 
             const room = await Room.findOne({
