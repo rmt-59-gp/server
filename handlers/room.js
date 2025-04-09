@@ -1,6 +1,12 @@
+
+
+const generateQuestion = require('../helpers/generateQuestion');
 const { Room, UserRoom, User } = require('../models');
 
 async function roomHandler({ io, socket }) {
+
+  let question
+
   try {
     socket.on('room:create', async ({ name, topic }) => {
       try {
@@ -14,6 +20,8 @@ async function roomHandler({ io, socket }) {
         if (!user) {
           return socket.emit('error', { message: 'User not found' });
         }
+        question = await generateQuestion(topic)
+        
 
         // Create the room
         const room = await Room.create({
@@ -27,6 +35,11 @@ async function roomHandler({ io, socket }) {
         await UserRoom.create({
           UserId: user.id,
           RoomId: room.id,
+        });
+
+        const roomAll = await Room.findAll();
+        await Room.update({ questions: question }, {
+          where: { id: room.id }
         });
 
         const roomAll = await Room.findAll();
@@ -71,6 +84,48 @@ async function roomHandler({ io, socket }) {
         socket.emit('error', { message: 'Failed to join room' });
       }
     });
+
+  } catch (error) {
+    console.error('Socket error:', error);
+  }
+
+  let roomCode
+  
+  socket.on('question:getRoomCode', async (arg)=> {
+    question = await Room.findOne({
+      where: {
+        code: arg.id
+      }
+    })
+    console.log(question.questions, '<=====');
+    
+    socket.emit('question:get', {question: question.questions})
+  })
+
+  socket.on('username:send', async (arg)=> {
+    const userData = await User.findOne({
+      where: {
+        name: arg.name
+      }
+    })
+
+    const userRoomData = await UserRoom.findOne({
+      where: {
+        UserId: userData.id
+      }
+    })
+
+    console.log(userRoomData, '<=====');
+    socket.emit('user:score', {score: userRoomData.score})
+    
+  })
+  // question = await Room.findOne({
+  //   where: {
+  //     code: roomCode
+  //   }
+  // })
+  
+
 
     socket.on('leaderboard:fetch', async ({ roomId }) => {
       try {
