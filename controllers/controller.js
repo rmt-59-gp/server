@@ -42,14 +42,74 @@ class Controller {
                     exclude: ['id', 'createdAt', 'updatedAt']
                 }
             })
-            // console.log(question);
-            // console.log(req.user);
-            // const {authorization} = req.headers;
 
-            // console.log(authorization);
+            await UserRoom.create({
+                UserId: host,
+                RoomId: room.id
+            })
+
             console.log(JSON.parse(room.question));
 
             res.status(201).json(room)
+        } catch (error) {
+            console.log(error);
+            next(error)
+        }
+    }
+
+    static async joinRoomFromParam(req, res, next){
+        try {
+            const {CodeRoom} = req.params || req.body
+            const userId = req.user.id
+
+            const room = await Room.findOne({
+                where: {
+                    CodeRoom
+                }
+            })
+            if(!room) throw {name: 'NotFound', message: 'Room not found'}
+
+            const userRoom = await UserRoom.create({
+                UserId: userId,
+                RoomId: room.id
+            }, {
+                attributes: {
+                    exclude: ['id', 'createdAt', 'updatedAt']
+                }
+            })
+            
+            res.status(200).json(userRoom)
+            
+        } catch (error) {
+            console.log(error);
+            next(error)
+        }
+    }
+
+    static async joinRoomFromCode(req, res, next){
+        try {
+            const {CodeRoom} = req.body
+            if(!CodeRoom) throw {name: 'BadRequest', message: 'CodeRoom is required'}
+
+            const room = await Room.findOne({
+                where: {
+                    CodeRoom
+                }
+            })
+
+            if(!room) throw {name: 'NotFound', message: 'Room not found'}
+
+            const userRoom = await UserRoom.create({
+                UserId: userId,
+                RoomId: room.id
+            }, {
+                attributes: {
+                    exclude: ['id', 'createdAt', 'updatedAt']
+                }
+            })
+            
+            res.status(200).json(userRoom)
+
         } catch (error) {
             console.log(error);
             next(error)
