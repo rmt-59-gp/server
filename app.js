@@ -17,6 +17,11 @@ const io = new Server(httpServer, {
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+const attachSocketIO = (io) => (req, res, next) => {
+  req.io = io;
+  next();
+};
+app.use(attachSocketIO(io));
 
 app.use(router)
 // io.on('connection', (socket) => {

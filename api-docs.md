@@ -193,3 +193,181 @@ _Response (500 - Internal Server Error)_
   "message": "Internal server error"
 }
 ```
+## 5. POST /rooms/:roomId/answers
+
+**Description**:
+- Submit answers for a specific room.
+
+**Request**:
+
+- **Params**:
+  ```json
+  {
+    "roomId": "integer (required)"
+  }
+  ```
+
+- **Body**:
+  ```json
+  {
+    "answers": [
+      {
+        "questionId": "integer",
+        "answer": "string"
+      }
+    ]
+  }
+  ```
+
+**_Response (200 - OK)_**:
+```json
+{
+  "message": "Answers submitted successfully",
+  "score": "integer"
+}
+```
+
+**_Response (400 - BadRequest)_**:
+```json
+{
+  "message": "Answers are required and must be an array"
+}
+```
+
+**_Response (404 - NotFound)_**:
+```json
+{
+  "message": "Room not found"
+}
+```
+
+**_Response (500 - Internal Server Error)_**:
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+## 6. POST /rooms/:roomId/start
+
+**Description**:
+- Start the game for a specific room.
+
+**Request**:
+
+- **Params**:
+  ```json
+  {
+    "roomId": "integer (required)"
+  }
+  ```
+
+**_Response (200 - OK)_**:
+```json
+{
+  "message": "Game started successfully"
+}
+```
+
+**_Response (404 - NotFound)_**:
+```json
+{
+  "message": "Room not found"
+}
+```
+
+**_Response (500 - Internal Server Error)_**:
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+## 7. POST /rooms/:roomId/end
+
+**Description**:
+- End the game for a specific room and calculate the final scores.
+
+**Request**:
+
+- **Params**:
+  ```json
+  {
+    "roomId": "integer (required)"
+  }
+  ```
+
+**_Response (200 - OK)_**:
+```json
+{
+  "message": "Game ended successfully",
+  "leaderboard": [
+    {
+      "UserId": "integer",
+      "name": "string",
+      "score": "integer"
+    }
+  ]
+}
+```
+
+**_Response (404 - NotFound)_**:
+```json
+{
+  "message": "Room not found"
+}
+```
+
+**_Response (500 - Internal Server Error)_**:
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+## 8. GET /rooms/:roomId/leaderboard
+
+**Description**:
+- Retrieve the leaderboard for a specific room.
+
+**Request**:
+
+- **Params**:
+  ```json
+  {
+    "roomId": "integer (required)"
+  }
+  ```
+
+**_Response (200 - OK)_**:
+```json
+{
+  "leaderboard": [
+    {
+      "UserId": "integer",
+      "name": "string",
+      "score": "integer"
+    }
+  ]
+}
+```
+
+**_Response (404 - NotFound)_**:
+```json
+{
+  "message": "Room not found"
+}
+```
+
+**_Response (500 - Internal Server Error)_**:
+```json
+{
+  "message": "Internal server error"
+}
+```
