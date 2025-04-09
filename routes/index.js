@@ -11,7 +11,8 @@ router.post('/users', Controller.createUser);
 router.use(authentication)
 
 router.post('/rooms', Controller.createRoom)
-// router.post('/rooms/:roomId/join')
+router.post('/rooms/join', Controller.joinRoomFromCode)
+router.post('/rooms/:CodeRoom/join', Controller.joinRoomFromParam)
 // router.get('/rooms/:roomId/questions')
 // router.post('/rooms/:roomId/answers')
 // router.post('/rooms/:roomId/start')
