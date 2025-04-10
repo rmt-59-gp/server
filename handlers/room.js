@@ -132,7 +132,7 @@ async function roomHandler({ io, socket }) {
     })
     
     // console.log(userRoomData, '<=====');
-    socket.emit('user:score', {score: userRoomData.score})
+    // socket.emit('user:score', {score: userRoomData.score})
     
   })
   
@@ -172,6 +172,17 @@ async function roomHandler({ io, socket }) {
         socket.emit('error', { message: 'Failed to fetch leaderboard' });
       }
     });
+
+  socket.on('startQuiz', async (code)=> {
+    try {
+      console.log(code, '<==== RoomCode');
+
+      io.to(code).emit('quiz:start', {roomCode:code})
+    } catch (error) {
+      console.error('Error starting quiz:', error);
+      socket.emit('error', { message: 'Failed to start quiz' });
+    }
+  })
     
   } catch (error) {
     console.error('Socket error:', error);
