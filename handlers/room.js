@@ -97,6 +97,35 @@ async function roomHandler({ io, socket }) {
       }
     });
 
+    socket.on('room:leave', async ({ code, username }) => {
+      try {
+        // Find the room
+        const room = await Room.findOne({
+          where: { code },
+        });
+    
+        if (!room) {
+          return socket.emit('error', { message: 'Room not found' });
+        }
+    
+        // Remove the user from the room members
+        const updatedMembers = room.members.filter((member) => member !== username);
+        await room.update({ members: updatedMembers });
+    
+        console.log(`User ${username} left room ${code}`);
+    
+        // Leave the room
+        socket.leave(code);
+    
+        // Emit updated room data to all clients in the room
+        const updatedRoom = await Room.findOne({ where: { code } });
+        io.to(code).emit('room:updated', updatedRoom);
+      } catch (error) {
+        console.error('Error leaving room:', error);
+        socket.emit('error', { message: 'Failed to leave room' });
+      }
+    });
+
     
     let roomCode
     
