@@ -84,6 +84,10 @@ async function roomHandler({ io, socket }) {
         // Join the room
         socket.join(code);
 
+        // Emit updated room data to all clients in the room
+        const updatedRoom = await Room.findOne({ where: { code } });
+        io.to(code).emit('room:updated', updatedRoom);
+
         const roomAll = await Room.findAll();
         socket.broadcast.emit('room:get', roomAll);
         // io.to(code).emit('room:joined', { members });
@@ -111,27 +115,17 @@ async function roomHandler({ io, socket }) {
     const userData = await User.findOne({
       where: {
         name: arg.name
-      },
-      include: {
-        model: UserRoom
-      }
-    })
-
-    const room = await Room.findOne({
-      where: {
-        code: arg.roomId
       }
     })
     
     const userRoomData = await UserRoom.findOne({
       where: {
-        UserId: userData.id,
-        RoomId: room.id
+        UserId: userData.id
       }
     })
     
     console.log(userRoomData, '<=====');
-    socket.emit('user:score', {score: userRoomData.score})
+    // socket.emit('user:score', {score: userRoomData.score})
     
   })
   
