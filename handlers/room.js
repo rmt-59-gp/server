@@ -166,7 +166,36 @@ async function roomHandler({ io, socket }) {
   })
   
   
+  socket.on('endGame', async ({ code }) => {
+    try {
+      const room = await Room.findOne({
+        where: { code },
+      });
   
+      if (!room) {
+        return socket.emit('error', { message: 'Room not found' });
+      }
+  
+      const leaderboard = await UserRoom.findAll({
+        where: { RoomId: room.id },
+        include: [{ model: User, attributes: ['name'] }],
+        attributes: ['UserId', 'score'],
+        order: [['score', 'DESC']],
+      });
+  
+      const leaderboardData = leaderboard.map((entry, index) => ({
+        rank: index + 1,
+        username: entry.User.name,
+        score: entry.score,
+      }));
+  
+      // Emit leaderboard to all clients in the room
+      io.to(code).emit('gameEnded', { leaderboard: leaderboardData });
+    } catch (error) {
+      console.error('Error ending game:', error);
+      socket.emit('error', { message: 'Failed to end game' });
+    }
+  });
   
   socket.on('leaderboard:fetch', async ({ roomId }) => {
     try {
