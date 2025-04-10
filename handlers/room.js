@@ -55,35 +55,85 @@ function roomHandler({ io, socket }) {
     }
   });
 
-  socket.on('room:join', async ({ code }) => {
+  // socket.on('room:join', async ({ code }) => {
+  //   try {
+  //     const username = socket.handshake.auth.username;
+
+  //     // Find the room
+  //     const room = await Room.findOne({
+  //       where: { code },
+  //     });
+
+  //     if (!room) {
+  //       return socket.emit('error', { message: 'Room not found' });
+  //     }
+
+  //     // Update room members
+  //     const updatedMembers = Array.from(new Set([...room.members, username]));
+  //     await room.update({ members: updatedMembers });
+
+  //     console.log(`User ${username} joined room ${code}`);
+
+  //     // Join the room
+  //     socket.join(code);
+
+  //     // Emit updated room data to all clients in the room
+  //     const updatedRoom = await Room.findOne({ where: { code } });
+  //     io.to(code).emit('room:updated', updatedRoom);
+
+  //     const roomAll = await Room.findAll();
+  //     socket.broadcast.emit('room:get', roomAll);
+  //     // io.to(code).emit('room:joined', { members });
+  //   } catch (error) {
+  //     console.error('Error joining room:', error);
+  //     socket.emit('error', { message: 'Failed to join room' });
+  //   }
+  // });
+
+    socket.on('room:join', async ({ code }) => {
     try {
       const username = socket.handshake.auth.username;
-
-      // Find the room
+  
       const room = await Room.findOne({
         where: { code },
       });
-
+  
       if (!room) {
         return socket.emit('error', { message: 'Room not found' });
       }
-
+      const user = await User.findOne({
+        where: { name: username },
+      });
+  
+      if (!user) {
+        return socket.emit('error', { message: 'User not found' });
+      }
+      const existingUserRoom = await UserRoom.findOne({
+        where: { UserId: user.id, RoomId: room.id },
+      });
+  
+      if (!existingUserRoom) {
+        await UserRoom.create({
+          UserId: user.id,
+          RoomId: room.id,
+        });
+      }
+  
       // Update room members
       const updatedMembers = Array.from(new Set([...room.members, username]));
       await room.update({ members: updatedMembers });
-
+  
       console.log(`User ${username} joined room ${code}`);
-
+  
       // Join the room
       socket.join(code);
-
+  
       // Emit updated room data to all clients in the room
       const updatedRoom = await Room.findOne({ where: { code } });
       io.to(code).emit('room:updated', updatedRoom);
-
+  
       const roomAll = await Room.findAll();
       socket.broadcast.emit('room:get', roomAll);
-      // io.to(code).emit('room:joined', { members });
     } catch (error) {
       console.error('Error joining room:', error);
       socket.emit('error', { message: 'Failed to join room' });
@@ -176,63 +226,33 @@ function roomHandler({ io, socket }) {
     }
   });
   
-  // socket.on('leaderboard:fetch', async ({ roomId }) => {
-
-    // sementara
-  //   try {
-  //     const room = await Room.findOne({
-  //       where: { id: roomId },
-  //     });
-
-  //     if (!room) {
-  //       return socket.emit('error', { message: 'Room not found' });
-  //     }
-
-  //     const leaderboard = await UserRoom.findAll({
-  //       where: { RoomId: roomId },
-  //       include: [
-  //         {
-  //           model: User,
-  //           attributes: ['name', 'score'],
-  //         },
-  //       ],
-  //       order: [[{ model: User }, 'score', 'DESC']],
-  //     });
-
-  //     const leaderboardData = leaderboard.map((entry, index) => ({
-  //       rank: index + 1,
-  //       username: entry.User.name,
-  //       score: entry.User.score,
-  //     }));
-
-  //     socket.emit('leaderboard:get', leaderboardData);
-  //   } catch (error) {
-  //     console.error('Error fetching leaderboard:', error);
-  //     socket.emit('error', { message: 'Failed to fetch leaderboard' });
-  //   }
-  // });
-
-    socket.on('leaderboard:fetch', async () => {
+  socket.on('leaderboard:fetch', async ({ roomId }) => {
     try {
-      // Fetch all users and their scores
+      const room = await Room.findOne({
+        where: { code: roomId },
+      });
+
+      if (!room) {
+        return socket.emit('error', { message: 'Room not found' });
+      }
+
       const leaderboard = await UserRoom.findAll({
+        where: { RoomId: room.id },
         include: [
           {
             model: User,
-            attributes: ['name'], // Ambil nama pengguna
+            attributes: ['name'],
           },
         ],
-        attributes: ['UserId', 'score'], // Ambil skor dari UserRoom
-        order: [['score', 'DESC']], // Urutkan berdasarkan skor tertinggi
+        order: [['score', 'DESC']],
       });
-  
+
       const leaderboardData = leaderboard.map((entry, index) => ({
         rank: index + 1,
         username: entry.User.name,
         score: entry.score,
       }));
-  
-      // Emit leaderboard data to the client
+
       socket.emit('leaderboard:get', leaderboardData);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
