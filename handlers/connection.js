@@ -17,15 +17,6 @@ async function connectionHandler({ io, socket }) {
 
     socket.emit('message', `Welcome to the server ${socket.handshake.auth.username}! Your ID is ${socket.id}`);
 
-    // socket.on('disconnect', async () => {
-    //   console.log('Client disconnected:', socket.id);
-
-    //   await User.destroy({
-    //     where: {
-    //       name: socket.handshake.auth.username,
-    //     },
-    //   });
-    // });
   } catch (error) {
     console.error(error);
   }

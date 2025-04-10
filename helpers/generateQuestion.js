@@ -2,7 +2,7 @@ const { GoogleGenAI } = require("@google/genai");
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-async function generateQuestion(topic){
+async function generateQuestion(topic) {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     try {
         const response = await ai.models.generateContent({
@@ -21,16 +21,13 @@ async function generateQuestion(topic){
 
                 hanya tampilkan data json itu saja tanpa ada data yang lain
             `,
-          });
-        //   console.log(response.text);
-          return response.text.replace("```json", "").replace("```", "")
+        });
+
+        return response.text.replace("```json", "").replace("```", "")
     } catch (error) {
         console.log(error);
     }
 
 }
-// generateQuestion("sistem informasi");
-
-// console.log(generateQuestion("sistem informasi"));
 
 module.exports = generateQuestion
