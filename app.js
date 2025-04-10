@@ -25,13 +25,12 @@ const attachSocketIO = (io) => (req, res, next) => {
 };
 app.use(attachSocketIO(io));
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors())
 
 app.use(require('./routes/index'));
-
+app.use(require('./middleware/errorHandling'))
 
 module.exports = httpServer;
 
