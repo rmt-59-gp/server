@@ -117,15 +117,22 @@ async function roomHandler({ io, socket }) {
         name: arg.name
       }
     })
-    
-    const userRoomData = await UserRoom.findOne({
+
+    const room = await Room.findOne({
       where: {
-        UserId: userData.id
+        code: arg.roomId
       }
     })
     
-    console.log(userRoomData, '<=====');
-    // socket.emit('user:score', {score: userRoomData.score})
+    const userRoomData = await UserRoom.findOne({
+      where: {
+        UserId: userData.id,
+        RoomId: room.id
+      }
+    })
+    
+    // console.log(userRoomData, '<=====');
+    socket.emit('user:score', {score: userRoomData.score})
     
   })
   
