@@ -170,37 +170,36 @@ async function roomHandler({ io, socket }) {
   
   socket.on('leaderboard:fetch', async ({ roomId }) => {
     try {
-      const room = await Room.findOne({
-        where: { id: roomId },
-      });
-      
+      const room = await Room.findOne({ where: { code: roomId } }); // Gunakan 'code' jika roomId adalah string
+  
       if (!room) {
-          return socket.emit('error', { message: 'Room not found' });
-        }
-        
-        const leaderboard = await UserRoom.findAll({
-          where: { RoomId: roomId },
-          include: [
-            {
-              model: User,
-              attributes: ['name', 'score'],
-            },
-          ],
-          order: [[{ model: User }, 'score', 'DESC']],
-        });
-
-        const leaderboardData = leaderboard.map((entry, index) => ({
-          rank: index + 1,
-          username: entry.User.name,
-          score: entry.User.score,
-        }));
-        
-        socket.emit('leaderboard:get', leaderboardData);
-      } catch (error) {
-        console.error('Error fetching leaderboard:', error);
-        socket.emit('error', { message: 'Failed to fetch leaderboard' });
+        return socket.emit('error', { message: 'Room not found' });
       }
-    });
+  
+      const leaderboard = await UserRoom.findAll({
+        where: { RoomId: room.id },
+        include: [
+          {
+            model: User,
+            attributes: ['name'],
+          },
+        ],
+        order: [['score', 'DESC']],
+      });
+  
+      const leaderboardData = leaderboard.map((entry, index) => ({
+        rank: index + 1,
+        username: entry.User.name,
+        score: entry.score,
+      }));
+  
+      console.log('Leaderboard data:', leaderboardData);
+      socket.emit('leaderboard:get', leaderboardData);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      socket.emit('error', { message: 'Failed to fetch leaderboard' });
+    }
+  });
 
   socket.on('startQuiz', async (code)=> {
     try {
@@ -216,6 +215,47 @@ async function roomHandler({ io, socket }) {
   } catch (error) {
     console.error('Socket error:', error);
   }
+
+  const roomCompletionStatus = {};
+
+  socket.on('quiz:finish', async ({ roomId, score }) => {
+    try {
+      const username = socket.handshake.auth.username;
+
+      const user = await User.findOne({ where: { name: username } });
+      const room = await Room.findOne({ where: { code: roomId } });
+
+      if (!user || !room) {
+        return socket.emit('error', { message: 'User or Room not found' });
+      }
+
+      await UserRoom.update(
+        { score },
+        { where: { UserId: user.id, RoomId: room.id } }
+      );
+
+      if (!roomCompletionStatus[roomId]) {
+        roomCompletionStatus[roomId] = new Set();
+      }
+      roomCompletionStatus[roomId].add(username);
+
+      const totalMembers = room.members.length;
+      const finishedMembers = roomCompletionStatus[roomId].size;
+
+      if (finishedMembers === totalMembers) {
+        console.log(`All users in room ${roomId} have finished the quiz.`);
+        io.to(roomId).emit('quiz:finished');
+        delete roomCompletionStatus[roomId];
+      } else {
+        console.log(`Finished members: ${finishedMembers}/${totalMembers}`);
+      }
+
+      console.log(`Score ${score} saved for user ${user.name} in room ${roomId}`);
+    } catch (error) {
+      console.error('Error finishing quiz:', error);
+      socket.emit('error', { message: 'Failed to finish quiz' });
+    }
+  });
     
     
   }
