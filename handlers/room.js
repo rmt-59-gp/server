@@ -32,10 +32,12 @@ async function roomHandler({ io, socket }) {
         });
 
         // Associate the user with the room
-        await UserRoom.create({
+        const userRoom = await UserRoom.create({
           UserId: user.id,
           RoomId: room.id,
         });
+
+        console.log(userRoom, 'userRoom <=====');
 
         const roomAll = await Room.findAll();
         await Room.update({ questions: question }, {
@@ -47,6 +49,13 @@ async function roomHandler({ io, socket }) {
         socket.join(room.code);
         socket.emit('room:new', room);
         socket.broadcast.emit('room:get', roomAll);
+        await Room.update({
+          questions: question
+        }, {
+          where: {
+            id: room.id
+          }
+        })
       } catch (error) {
         console.error('Error creating room:', error);
         socket.emit('error', { message: 'Failed to create room' });
@@ -112,7 +121,7 @@ async function roomHandler({ io, socket }) {
     })
     
     console.log(userRoomData, '<=====');
-    socket.emit('user:score', {score: userRoomData.score})
+    // socket.emit('user:score', {score: userRoomData.score})
     
   })
   
