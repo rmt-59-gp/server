@@ -127,8 +127,6 @@ async function roomHandler({ io, socket }) {
     });
 
     
-    let roomCode
-    
     socket.on('question:getRoomCode', async (arg)=> {
       question = await Room.findOne({
         where: {
